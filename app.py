@@ -1,42 +1,39 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for
 import os
 
 app = Flask(__name__)
-app.secret_key = 'clave_secreta'  # Cambia esto por una clave más segura
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Asegúrate de que la carpeta de uploads exista
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# Lista para almacenar información de fotos
+photos = []
 
-# Ruta principal
 @app.route('/')
 def index():
-    # Obtener todas las imágenes de la carpeta uploads
-    images = os.listdir(app.config['UPLOAD_FOLDER'])
-    return render_template('index.html', images=images)
+    return render_template('index.html', photos=photos)
 
-# Ruta para subir imágenes
 @app.route('/upload', methods=['GET', 'POST'])
-def upload_image():
+def upload():
     if request.method == 'POST':
-        # Verifica si se subió un archivo
-        if 'file' not in request.files:
-            flash('No se seleccionó ningún archivo')
-            return redirect(request.url)
-        
         file = request.files['file']
-        if file.filename == '':
-            flash('El archivo no tiene nombre')
-            return redirect(request.url)
-        
+        comment = request.form.get('comment', '')
+
         if file:
             filename = file.filename
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            flash('Imagen subida exitosamente')
-            return redirect(url_for('index'))
 
+            # Guardar información de la foto
+            photos.append({'filename': filename, 'comment': comment, 'likes': 0})
+            return redirect(url_for('index'))
     return render_template('upload.html')
 
+@app.route('/like/<int:photo_id>', methods=['POST'])
+def like_photo(photo_id):
+    if 0 <= photo_id < len(photos):
+        photos[photo_id]['likes'] += 1  # Incrementa los "Me gusta"
+    return redirect(url_for('index'))
+
 if __name__ == '__main__':
+    if not os.path.exists(UPLOAD_FOLDER):
+        os.makedirs(UPLOAD_FOLDER)
     app.run(debug=True)
