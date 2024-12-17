@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Álbum de cumpleaños</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Álbum de cumpleaños</h1>
+    <a href="/upload">Subir imagen</a>
+    <div class="gallery">
+        {% for image in images %}
+            <div class="photo">
+                <img src="{{ url_for('static', filename='uploads/' + image) }}" alt="Foto">
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
