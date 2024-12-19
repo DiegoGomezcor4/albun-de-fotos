@@ -96,6 +96,7 @@
                         <p class="card-text">{{ photo.comment }}</p>
                         <form method="POST" action="{{ url_for('like_photo', photo_id=loop.index0) }}">
                             <button type="submit" class="btn btn-light">
+                                <img src="static\icons\corazon-de-neon.png" alt="Corazón rosado" style="width: 20px; height: 20px;">
                                 💕 <span class="text-danger">{{ photo.likes }}</span>
                             </button>
                         </form>
