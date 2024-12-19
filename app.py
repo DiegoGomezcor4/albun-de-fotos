@@ -1,12 +1,18 @@
 from flask import Flask, render_template, request, redirect, url_for
 import os
+import json
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'static/uploads'
+PHOTOS_FILE = 'photos.json'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Lista para almacenar información de fotos
-photos = []
+# Cargar la lista de fotos desde el archivo JSON
+if os.path.exists(PHOTOS_FILE):
+    with open(PHOTOS_FILE, 'r') as f:
+        photos = json.load(f)
+else:
+    photos = []
 
 @app.route('/')
 def index():
@@ -24,6 +30,11 @@ def upload():
 
             # Guardar información de la foto
             photos.append({'filename': filename, 'comment': comment, 'likes': 0})
+
+            # Guardar la lista de fotos en el archivo JSON
+            with open(PHOTOS_FILE, 'w') as f:
+                json.dump(photos, f)
+
             return redirect(url_for('index'))
     return render_template('upload.html')
 
@@ -31,6 +42,11 @@ def upload():
 def like_photo(photo_id):
     if 0 <= photo_id < len(photos):
         photos[photo_id]['likes'] += 1  # Incrementa los "Me gusta"
+
+        # Guardar la lista de fotos en el archivo JSON
+        with open(PHOTOS_FILE, 'w') as f:
+            json.dump(photos, f)
+
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
