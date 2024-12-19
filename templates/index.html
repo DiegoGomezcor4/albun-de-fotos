@@ -96,7 +96,6 @@
                         <p class="card-text">{{ photo.comment }}</p>
                         <form method="POST" action="{{ url_for('like_photo', photo_id=loop.index0) }}">
                             <button type="submit" class="btn btn-light">
-                                <img src="static\icons\corazon-de-neon.png" alt="Corazón rosado" style="width: 20px; height: 20px;">
                                 💕 <span class="text-danger">{{ photo.likes }}</span>
                             </button>
                         </form>
@@ -125,9 +124,9 @@
         const photos = {{ photos|tojson }};
         
         // Al abrir el modal, mostramos la imagen correspondiente
-        document.addEventListener('show.bs.modal', function(event) {
+        document.getElementById('imageModal').addEventListener('show.bs.modal', function(event) {
             const button = event.relatedTarget;
-            currentPhotoIndex = button.getAttribute('data-photo-index');
+            currentPhotoIndex = parseInt(button.getAttribute('data-photo-index'));
             updateModalImage(currentPhotoIndex);
         });
         
