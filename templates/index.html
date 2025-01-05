@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Álbum de cumpleaños</title>
+    <title>Cumple de Lourdes - 7 años</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -82,7 +82,7 @@
 </head>
 <body>
     <div class="container py-5">
-        <h1 class="text-center mb-2">🎉 Álbum de cumpleaños 🎂</h1>
+        <h1 class="text-center mb-2">🎉 Cumple de Lourdes 🎂</h1>
         <h2 class="text-center text-muted">7 años</h2>
         <div class="text-center mb-4">
             <a href="/upload" class="btn btn-primary">Subir imagen</a>
@@ -94,10 +94,13 @@
                     <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}" class="card-img-top" alt="Foto" data-bs-toggle="modal" data-bs-target="#imageModal" data-photo-index="{{ loop.index0 }}">
                     <div class="card-body">
                         <p class="card-text">{{ photo.comment }}</p>
-                        <form method="POST" action="{{ url_for('like_photo', photo_id=loop.index0) }}">
+                        <form method="POST" action="{{ url_for('like_photo', photo_id=photo.id) }}">
                             <button type="submit" class="btn btn-light">
                                 💕 <span class="text-danger">{{ photo.likes }}</span>
                             </button>
+                        </form>
+                        <form method="POST" action="{{ url_for('delete', photo_id=photo.id) }}" style="margin-top: 10px;">
+                            <button type="submit" class="btn btn-danger">Borrar</button>
                         </form>
                     </div>
                 </div>
