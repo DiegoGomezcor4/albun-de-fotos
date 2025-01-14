@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, Response
+from flask import Flask, render_template, request, redirect, url_for, Response, jsonify
 import os
 import json
 from functools import wraps
@@ -87,7 +87,7 @@ def like_photo(photo_id):
             break
     with open(PHOTOS_FILE, 'w') as f:
         json.dump(photos, f)
-    return redirect(url_for('index'))
+    return jsonify({'likes': photo['likes']})
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
