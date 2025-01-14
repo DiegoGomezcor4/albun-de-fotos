@@ -1,10 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, Response, session
+from flask import Flask, render_template, request, redirect, url_for, Response
 import os
 import json
 from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
 UPLOAD_FOLDER = 'static/uploads'
 PHOTOS_FILE = 'photos.json'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -36,33 +35,15 @@ def requires_auth(f):
         auth = request.authorization
         if not auth or not check_auth(auth.username, auth.password):
             return authenticate()
-        session['logged_in'] = True
         return f(*args, **kwargs)
     return decorated
 
 @app.route('/')
 def index():
-    logged_in = session.get('logged_in', False)
-    return render_template('index.html', photos=photos, logged_in=logged_in)
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        if check_auth(username, password):
-            session['logged_in'] = True
-            return redirect(url_for('index'))
-        else:
-            return render_template('login.html', error='Credenciales incorrectas')
-    return render_template('login.html')
-
-@app.route('/logout')
-def logout():
-    session.pop('logged_in', None)
-    return redirect(url_for('index'))
+    return render_template('index.html', photos=photos)
 
 @app.route('/upload', methods=['GET', 'POST'])
+@requires_auth
 def upload():
     if request.method == 'POST':
         # Lógica para manejar la carga de archivos
