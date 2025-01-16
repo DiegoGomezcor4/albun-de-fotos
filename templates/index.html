@@ -48,6 +48,36 @@
                 transform: rotate(360deg);
             }
         }
+
+        .modal-body {
+            position: relative;
+        }
+
+        .arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2em;
+            color: white;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .arrow-left {
+            left: 10px;
+        }
+
+        .arrow-right {
+            right: 10px;
+        }
+
+        .zoomable {
+            cursor: zoom-in;
+        }
+
+        .zoomed {
+            cursor: zoom-out;
+        }
     </style>
 </head>
 <body>
@@ -69,7 +99,7 @@
             {% for photo in photos %}
             <div class="col-md-4 mb-4">
                 <div class="card">
-                    <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}" class="card-img-top" alt="Foto" data-bs-toggle="modal" data-bs-target="#imageModal" data-photo-index="{{ loop.index0 }}">
+                    <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}" class="card-img-top zoomable" alt="Foto" data-bs-toggle="modal" data-bs-target="#imageModal" data-photo-index="{{ loop.index0 }}">
                     <div class="card-body">
                         <p class="card-text">{{ photo.comment }}</p>
                         <form method="POST" action="{{ url_for('like_photo', photo_id=loop.index0) }}" class="like-form">
@@ -99,7 +129,9 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <img src="" class="img-fluid" id="modalImage" alt="Foto" data-photo-index="">
+                    <span class="arrow arrow-left" onclick="changeImage(-1)">&#9664;</span>
+                    <img src="" class="img-fluid zoomable" id="modalImage" alt="Foto" data-photo-index="">
+                    <span class="arrow arrow-right" onclick="changeImage(1)">&#9654;</span>
                 </div>
             </div>
         </div>
@@ -123,6 +155,22 @@
                     form.find('.like-count').text(data.likes);
                 });
             });
+
+            $('#modalImage').on('click', function() {
+                var img = $(this);
+                if (img.hasClass('zoomed')) {
+                    img.removeClass('zoomed').css('transform', 'scale(1)');
+                    $('.arrow').show();
+                } else {
+                    img.addClass('zoomed').css('transform', 'scale(2)');
+                    $('.arrow').hide();
+                }
+            });
+
+            $('#imageModal').on('hidden.bs.modal', function () {
+                $('#modalImage').removeClass('zoomed').css('transform', 'scale(1)');
+                $('.arrow').show();
+            });
         });
 
         $('#imageModal').on('show.bs.modal', function (event) {
@@ -132,6 +180,8 @@
             var modal = $(this);
             modal.find('#modalImage').attr('src', imgSrc);
             modal.find('#modalImage').data('photo-index', photoIndex);
+            modal.find('#modalImage').removeClass('zoomed').css('transform', 'scale(1)');
+            $('.arrow').show();
         });
 
         function changeImage(direction) {
@@ -141,6 +191,8 @@
             if (newImgSrc) {
                 $('#modalImage').attr('src', newImgSrc);
                 $('#modalImage').data('photo-index', newIndex);
+                $('#modalImage').removeClass('zoomed').css('transform', 'scale(1)');
+                $('.arrow').show();
             }
         }
 
