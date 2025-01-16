@@ -96,12 +96,10 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="imageModalLabel">Foto</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <img src="" class="img-fluid" id="modalImage" alt="Foto">
+                    <img src="" class="img-fluid" id="modalImage" alt="Foto" data-photo-index="">
                 </div>
             </div>
         </div>
@@ -124,15 +122,16 @@
             var imgSrc = $('img[data-photo-index="' + photoIndex + '"]').attr('src');
             var modal = $(this);
             modal.find('#modalImage').attr('src', imgSrc);
+            modal.find('#modalImage').data('photo-index', photoIndex);
         });
 
         function changeImage(direction) {
-            var currentIndex = $('#imageModal').find('#modalImage').data('photo-index');
+            var currentIndex = $('#modalImage').data('photo-index');
             var newIndex = currentIndex + direction;
             var newImgSrc = $('img[data-photo-index="' + newIndex + '"]').attr('src');
             if (newImgSrc) {
-                $('#imageModal').find('#modalImage').attr('src', newImgSrc);
-                $('#imageModal').find('#modalImage').data('photo-index', newIndex);
+                $('#modalImage').attr('src', newImgSrc);
+                $('#modalImage').data('photo-index', newIndex);
             }
         }
 
