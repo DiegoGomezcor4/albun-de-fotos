@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, Response, jsonify
+from flask import Flask, render_template, request, redirect, url_for, Response, session
 import os
 import json
 from functools import wraps
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'
 UPLOAD_FOLDER = 'static/uploads'
 PHOTOS_FILE = 'photos.json'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -35,33 +36,71 @@ def requires_auth(f):
         auth = request.authorization
         if not auth or not check_auth(auth.username, auth.password):
             return authenticate()
+        session['logged_in'] = True
         return f(*args, **kwargs)
     return decorated
 
 @app.route('/')
 def index():
-    return render_template('index.html', photos=photos)
+    logged_in = session.get('logged_in', False)
+    return render_template('index.html', photos=photos, logged_in=logged_in)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if check_auth(username, password):
+            session['logged_in'] = True
+            return redirect(url_for('index'))
+        else:
+            return render_template('login.html', error='Credenciales incorrectas')
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    return redirect(url_for('index'))
 
 @app.route('/upload', methods=['GET', 'POST'])
-@requires_auth
 def upload():
     if request.method == 'POST':
-        # Lógica para manejar la carga de archivos
-        file = request.files['file']
-        if file:
-            filename = file.filename
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            photo = {
-                'id': len(photos),
-                'filename': filename,
-                'comment': request.form.get('comment', ''),
-                'likes': 0
-            }
-            photos.append(photo)
+        # Lógica para manejar la carga de múltiples archivos
+        files = request.files.getlist('files[]')
+        for file in files:
+            if file:
+                filename = file.filename
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                file.save(file_path)
+                photo = {
+                    'id': len(photos),
+                    'filename': filename,
+                    'comment': '',
+                    'likes': 0
+                }
+                photos.append(photo)
+        with open(PHOTOS_FILE, 'w') as f:
+            json.dump(photos, f)
+        return redirect(url_for('index'))
+    return render_template('upload.html')
+
+@app.route('/edit/<int:photo_id>', methods=['GET', 'POST'])
+@requires_auth
+def edit(photo_id):
+    global photos
+    photo_to_edit = None
+    for photo in photos:
+        if photo['id'] == photo_id:
+            photo_to_edit = photo
+            break
+    if request.method == 'POST':
+        if photo_to_edit:
+            photo_to_edit['comment'] = request.form['comment']
             with open(PHOTOS_FILE, 'w') as f:
                 json.dump(photos, f)
         return redirect(url_for('index'))
-    return render_template('upload.html')
+    return render_template('edit.html', photo=photo_to_edit)
 
 @app.route('/delete/<int:photo_id>', methods=['POST'])
 @requires_auth
@@ -87,7 +126,7 @@ def like_photo(photo_id):
             break
     with open(PHOTOS_FILE, 'w') as f:
         json.dump(photos, f)
-    return jsonify({'likes': photo['likes']})
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))

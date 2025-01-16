@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar descripción</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Editar descripción</h1>
+        <form method="POST" action="{{ url_for('edit', photo_id=photo.id) }}">
+            <div class="form-group">
+                <label for="comment">Descripción</label>
+                <textarea class="form-control" id="comment" name="comment" rows="3" required>{{ photo.comment }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Guardar cambios</button>
+        </form>
+    </div>
+</body>
+</html>

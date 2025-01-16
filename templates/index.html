@@ -1,107 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Cumple de Lourdes - 7 años</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Álbum de cumpleaños</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        body {
-            background-color: #ffffff; /* Fondo blanco */
-            color: #333333; /* Color del texto en gris oscuro */
-        }
-        h1, h2 {
-            color: #f28ab2; /* Título en rosado */
-        }
-        .card {
-            background-color: #fff2f9; /* Fondo pastel rosado */
-            border: 1px solid #f1b6c1; /* Borde rosado suave */
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .card-body {
-            background-color: #fde1eb; /* Fondo suave para el contenido */
-            border-radius: 12px;
-        }
-        .btn-light {
-            background-color: #f8c8d8; /* Fondo rosado suave */
-            border: none;
-            font-size: 1.2rem;
-            color: #d14789;
-        }
-        .btn-light:hover {
-            background-color: #f5a2c7; /* Cambio de color al pasar el mouse */
-            color: #d14789;
-        }
-        .btn-primary {
-            background-color: #f28ab2; /* Botón rosado */
-            border: none;
-        }
-        .btn-primary:hover {
-            background-color: #d14789; /* Botón más oscuro al pasar */
-        }
-        .card-img-top {
-            border-radius: 8px;
-            width: 100%;
-            height: auto; /* Permitir que las imágenes mantengan su tamaño real */
-            max-width: 100%; /* Evitar que las imágenes se desborden del contenedor */
-            cursor: pointer;
-        }
-        .text-muted {
-            color: #a6a6a6;
-        }
-        .text-center h1 {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-weight: bold;
-        }
-        .text-danger {
-            font-size: 1.4rem;
-        }
-        .container {
-            max-width: 1200px;
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            height: 2em;
+            width: 2em;
+            overflow: show;
             margin: auto;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
         }
-        /* Estilo de las flechas para el modal */
-        .modal-prev, .modal-next {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 2rem;
-            color: #fff;
-            background-color: rgba(0, 0, 0, 0.5);
-            border: none;
-            padding: 10px;
-            cursor: pointer;
+
+        .loading-spinner:before {
+            content: '';
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
         }
-        .modal-prev {
-            left: 10px;
+
+        .spinner {
+            border: 0.4em solid rgba(0, 0, 0, 0.1);
+            border-left-color: #000;
+            border-radius: 50%;
+            width: 2em;
+            height: 2em;
+            animation: spin 1s linear infinite;
         }
-        .modal-next {
-            right: 10px;
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container py-5">
-        <h1 class="text-center mb-2">🎉 Cunple de Lourdes 🎂</h1>
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+    </div>
+    <div class="container">
+        <h1 class="text-center mb-2">🎉 Álbum de cumpleaños 🎂</h1>
         <h2 class="text-center text-muted">7 años</h2>
         <div class="text-center mb-4">
+            {% if logged_in %}
             <a href="/upload" class="btn btn-primary">Subir imagen</a>
+            <a href="/logout" class="btn btn-secondary">Cerrar sesión</a>
+            {% else %}
+            <a href="/login" class="btn btn-primary">Iniciar sesión</a>
+            {% endif %}
         </div>
         <div class="row g-3">
             {% for photo in photos %}
-            <div class="col-md-4">
+            <div class="col-md-4 mb-4">
                 <div class="card">
                     <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}" class="card-img-top" alt="Foto" data-bs-toggle="modal" data-bs-target="#imageModal" data-photo-index="{{ loop.index0 }}">
                     <div class="card-body">
                         <p class="card-text">{{ photo.comment }}</p>
-                        <form method="POST" action="{{ url_for('like_photo', photo_id=photo.id) }}" class="like-form">
+                        <form method="POST" action="{{ url_for('like_photo', photo_id=loop.index0) }}">
                             <button type="submit" class="btn btn-light">
-                                💕 <span class="text-danger likes-count">{{ photo.likes }}</span>
+                                💕 <span class="text-danger">{{ photo.likes }}</span>
                             </button>
                         </form>
-                        <form method="POST" action="{{ url_for('delete', photo_id=photo.id) }}" style="margin-top: 10px;">
-                            <button type="submit" class="btn btn-danger">Borrar</button>
+                        {% if logged_in %}
+                        <a href="{{ url_for('edit', photo_id=loop.index0) }}" class="btn btn-warning mt-2">Editar</a>
+                        <form method="POST" action="{{ url_for('delete', photo_id=loop.index0) }}" class="d-inline">
+                            <button type="submit" class="btn btn-danger mt-2">Eliminar</button>
                         </form>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -109,43 +90,50 @@
         </div>
     </div>
 
-    <!-- Modal para imagen -->
+    <!-- Modal -->
     <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModalLabel">Foto</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
                 <div class="modal-body">
-                    <button type="button" class="modal-prev" onclick="changeImage(-1)">&#10094;</button>
-                    <img id="modalImage" src="" alt="Imagen del modal" class="img-fluid mx-auto d-block">
-                    <button type="button" class="modal-next" onclick="changeImage(1)">&#10095;</button>
+                    <img src="" class="img-fluid" id="modalImage" alt="Foto">
                 </div>
             </div>
         </div>
     </div>
-    
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        let currentPhotoIndex = 0;
-        const photos = {{ photos|tojson }};
-        
-        // Al abrir el modal, mostramos la imagen correspondiente
-        document.getElementById('imageModal').addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            currentPhotoIndex = parseInt(button.getAttribute('data-photo-index'));
-            updateModalImage(currentPhotoIndex);
+        $(document).ready(function() {
+            $('.loading-spinner').show();
+            $(window).on('load', function() {
+                $('.loading-spinner').hide();
+            });
         });
-        
-        function updateModalImage(index) {
-            const modalImage = document.getElementById('modalImage');
-            modalImage.src = "{{ url_for('static', filename='uploads/') }}" + photos[index].filename;
-        }
-        
+
+        $('#imageModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var photoIndex = button.data('photo-index');
+            var imgSrc = $('img[data-photo-index="' + photoIndex + '"]').attr('src');
+            var modal = $(this);
+            modal.find('#modalImage').attr('src', imgSrc);
+        });
+
         function changeImage(direction) {
-            currentPhotoIndex += direction;
-            if (currentPhotoIndex < 0) {
-                currentPhotoIndex = photos.length - 1; // Volver al final si está al principio
-            } else if (currentPhotoIndex >= photos.length) {
-                currentPhotoIndex = 0; // Volver al principio si está al final
+            var currentIndex = $('#imageModal').find('#modalImage').data('photo-index');
+            var newIndex = currentIndex + direction;
+            var newImgSrc = $('img[data-photo-index="' + newIndex + '"]').attr('src');
+            if (newImgSrc) {
+                $('#imageModal').find('#modalImage').attr('src', newImgSrc);
+                $('#imageModal').find('#modalImage').data('photo-index', newIndex);
             }
-            updateModalImage(currentPhotoIndex);
         }
 
         // Agregar funcionalidad de flechas del teclado
@@ -156,23 +144,6 @@
             if (event.key === 'ArrowRight') {
                 changeImage(1); // Flecha derecha: mover a la foto siguiente
             }
-        });
-
-        // Manejar la acción de "me gusta" con AJAX
-        document.querySelectorAll('.like-form').forEach(form => {
-            form.addEventListener('submit', function(event) {
-                event.preventDefault();
-                const action = this.action;
-                fetch(action, {
-                    method: 'POST'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    const likesCount = this.querySelector('.likes-count');
-                    likesCount.textContent = data.likes;
-                })
-                .catch(error => console.error('Error:', error));
-            });
         });
     </script>
 
