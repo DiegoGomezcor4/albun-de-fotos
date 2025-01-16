@@ -72,9 +72,9 @@
                     <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}" class="card-img-top" alt="Foto" data-bs-toggle="modal" data-bs-target="#imageModal" data-photo-index="{{ loop.index0 }}">
                     <div class="card-body">
                         <p class="card-text">{{ photo.comment }}</p>
-                        <form method="POST" action="{{ url_for('like_photo', photo_id=loop.index0) }}">
+                        <form method="POST" action="{{ url_for('like_photo', photo_id=loop.index0) }}" class="like-form">
                             <button type="submit" class="btn btn-light">
-                                💕 <span class="text-danger">{{ photo.likes }}</span>
+                                💕 <span class="text-danger like-count">{{ photo.likes }}</span>
                             </button>
                         </form>
                         {% if logged_in %}
@@ -105,7 +105,7 @@
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
@@ -113,6 +113,15 @@
             $('.loading-spinner').show();
             $(window).on('load', function() {
                 $('.loading-spinner').hide();
+            });
+
+            $('.like-form').on('submit', function(event) {
+                event.preventDefault();
+                var form = $(this);
+                var url = form.attr('action');
+                $.post(url, function(data) {
+                    form.find('.like-count').text(data.likes);
+                });
             });
         });
 
