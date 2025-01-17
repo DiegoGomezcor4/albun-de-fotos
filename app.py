@@ -113,10 +113,15 @@ def delete(photo_id):
             break
     if photo_to_delete:
         photos.remove(photo_to_delete)
-        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], photo_to_delete['filename']))
+        try:
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], photo_to_delete['filename']))
+        except FileNotFoundError:
+            pass
         with open(PHOTOS_FILE, 'w') as f:
             json.dump(photos, f)
-    return redirect(url_for('index'))
+        return jsonify({'success': True})
+    else:
+        return jsonify({'error': 'Photo not found'}), 404
 
 @app.route('/like/<int:photo_id>', methods=['POST'])
 def like_photo(photo_id):
